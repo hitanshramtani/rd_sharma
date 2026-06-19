@@ -822,51 +822,38 @@
     let activeQs = [];
 
     // ─── File Loading & Core Logic ──────────────────────────────────
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        try {
-          const raw = JSON.parse(ev.target.result);
-          
-          // Handle different JSON structures
-          if (raw.classes) {
-            classes = raw.classes;
-          } else if (raw.class !== undefined && raw.chapters) {
-            classes = [raw];
-          } else {
-            alert('Unrecognized JSON format. Please check the file structure.');
-            return;
-          }
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('./rd_sharma_master.json');
+        const raw = await response.json();
 
-          // ★ Sort classes numerically ★
-          classes.sort((a, b) => {
-             const numA = parseInt(String(a.class).replace(/[^0-9]/g, '')) || 0;
-             const numB = parseInt(String(b.class).replace(/[^0-9]/g, '')) || 0;
-             return numA - numB;
-          });
+        let statsData = {};
 
-          // Update header stats with global fallback if structure exists
-          const stats = document.getElementById('hstats');
-          if (raw.total_questions) {
-            stats.innerHTML = `
-              <div class="stat-pill"><b>${raw.total_classes || classes.length}</b> Classes</div>
-              <div class="stat-pill"><b>${raw.total_chapters || '?'}</b> Chapters</div>
-              <div class="stat-pill"><b>${raw.total_questions.toLocaleString()}</b> Qs</div>
-            `;
-          } else {
-             initAppStatsFallback();
-          }
-
-          buildNav();
-          document.getElementById('welcome').style.display = 'none';
-        } catch (err) {
-          alert('Error parsing JSON: ' + err.message);
+        if (raw.classes) {
+          classes = raw.classes;
+          statsData = {
+            clsCount: raw.total_classes || classes.length,
+            chCount: raw.total_chapters || 0,
+            qCount: raw.total_questions || 0
+          };
+        } else if (raw.class !== undefined && raw.chapters) {
+          classes = [raw];
+          statsData = {
+            clsCount: 1,
+            chCount: raw.chapters.length,
+            qCount: raw.chapters.reduce(
+              (sum, ch) => sum + (ch.questions || []).length,
+              0
+            )
+          };
         }
-      };
-      reader.readAsText(file);
+
+        initApp(statsData);
+
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load JSON");
+      }
     });
 
     function initAppStatsFallback() {
