@@ -830,13 +830,17 @@
         let statsData = {};
 
         if (raw.classes) {
-          classes = raw.classes;
-          statsData = {
-            clsCount: raw.total_classes || classes.length,
-            chCount: raw.total_chapters || 0,
-            qCount: raw.total_questions || 0
-          };
-        } else if (raw.class !== undefined && raw.chapters) {
+            classes = raw.classes;
+
+            // Sort classes: 6,7,8,9,10,11,12
+            classes.sort((a, b) => Number(a.class) - Number(b.class));
+
+            statsData = {
+                clsCount: raw.total_classes || classes.length,
+                chCount: raw.total_chapters || 0,
+                qCount: raw.total_questions || 0
+            };
+          } else if (raw.class !== undefined && raw.chapters) {
           classes = [raw];
           statsData = {
             clsCount: 1,
