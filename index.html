@@ -869,7 +869,22 @@
         <div class="stat-pill"><b>${totalQuestions.toLocaleString()}</b> Qs</div>
       `;
     }
+    function initApp(stats) {
+        const statsEl = document.getElementById('hstats');
 
+        statsEl.innerHTML = `
+            <div class="stat-pill"><b>${stats.clsCount}</b> Class${stats.clsCount > 1 ? 'es' : ''}</div>
+            <div class="stat-pill"><b>${stats.chCount}</b> Chapters</div>
+            <div class="stat-pill"><b>${stats.qCount.toLocaleString()}</b> Qs</div>
+        `;
+
+        buildNav();
+
+        const welcome = document.getElementById('welcome');
+        if (welcome) {
+            welcome.style.display = 'none';
+        }
+    }
     // ─── Sidebar Navigation ─────────────────────────────────────────
     function buildNav() {
       const tree = document.getElementById('navTree');
